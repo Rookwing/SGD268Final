@@ -14,11 +14,11 @@ public class GameManager : MonoBehaviour
     [Header("Player Controls")]
     public GameObject player;
     public GameObject inventoryMenu;
+    public InventoryManager im;
 
-    List<GameObject> inventoryInGame;
-    List<GameObject> inventoryOnHand;
-    List<GameObject> inventorySlots;
-    List<GameObject> inventorySprites;
+    public List<GameObject> inventoryInGame;
+    public List<GameObject> inventoryOnHand;
+    public List<Sprite> inventorySprites;
 
     [HideInInspector] public bool abilityActive;
     [HideInInspector] public bool[] canUse = new bool[4];
