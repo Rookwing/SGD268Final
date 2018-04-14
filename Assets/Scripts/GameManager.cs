@@ -13,44 +13,31 @@ public class GameManager : MonoBehaviour
 
     [Header("Player Controls")]
     public GameObject player;
-    public GameObject inventoryMenu;
     public InventoryManager im;
-
-    public List<GameObject> inventoryInGame;
-    public List<GameObject> inventoryOnHand;
-    public List<Sprite> inventorySprites;
+    public TPCamera mainCam;
 
     [HideInInspector] public bool abilityActive;
     [HideInInspector] public bool[] canUse = new bool[4];
+
+    private void Start()
+    {
+        mainCam = Camera.main.GetComponent<TPCamera>();    
+    }
 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.I))
         {
-            MenuOpen();
+            im.MenuOpen();
         }
     }
 
-    void MenuOpen()
-    {
-        inventoryMenu.SetActive(!inventoryMenu.activeInHierarchy);
-
-        if (inventoryMenu.activeInHierarchy)
-        {
-            Pause();
-        }
-        else
-        {
-            Play();
-        }
-    }
-
-    private void Pause()
+    public void Pause()
     {
         Time.timeScale = 0;
     }
 
-    void Play()
+    public void Play()
     {
         Time.timeScale = 1;
     }

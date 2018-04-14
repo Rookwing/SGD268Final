@@ -6,6 +6,6 @@ public class ItemPickup : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        Destroy(other.gameObject);
+        Destroy(this.gameObject);
     }
 }

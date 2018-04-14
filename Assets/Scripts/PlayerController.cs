@@ -6,8 +6,10 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     Animator anim;
-    bool bToggle;
-    public GameObject axeObject;
+    bool attacking;
+    [SerializeField] GameObject axeObject;
+    private bool lockedOn = false;
+    public GameObject lockTarget;
 
     void Start()
     {
@@ -21,9 +23,8 @@ public class PlayerController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                ActivateAbility(UIManager.ui.ability1Icon, 2);
-                bToggle = !bToggle;
-                ActivateAbility(bToggle);
+                ActivateAbility(UIManager.ui.ability1Icon, 0.5f);
+                Attack();
                 //GameManager.gm.abilityActive = bToggle;
             }
 
@@ -54,6 +55,29 @@ public class PlayerController : MonoBehaviour
                 anim.SetTrigger("tPotion");
                 GameManager.gm.abilityActive = true;
             }
+
+            if(Input.GetMouseButtonDown(1))
+            {
+                lockedOn = true;
+                anim.SetBool("Targeting", true);
+                //TODO: GetTarget()
+
+            }
+
+            if (Input.GetMouseButtonUp(1))
+            {
+                anim.SetBool("Targeting", false);
+                lockedOn = false;
+                //TODO: Remove Target once GetTarget() is added.
+            }
+
+            if (lockedOn)
+            {
+                float mouseX = Input.GetAxis("Mouse X");
+                GameManager.gm.mainCam.CameraRotation(mouseX);
+                transform.Rotate(Vector3.up * mouseX);
+                //TODO: Make player look at target, and move camera accordingly. If there is no target, make the player turn to face the camera direction.
+            }
         }        
     }
 
@@ -65,9 +89,16 @@ public class PlayerController : MonoBehaviour
             ac.Dim(true, cooldown);
     }
 
-    void ActivateAbility(bool param)
+    void Attack()
     {
-        anim.SetBool("bAttack", param);
+        attacking = true;
+        anim.SetBool("bAttack", attacking);
+    }
+
+    void StopAttacking()
+    {
+        attacking = false;
+        anim.SetBool("bAttack", attacking);
     }
 
     public void CanUseAbilites()
@@ -79,4 +110,5 @@ public class PlayerController : MonoBehaviour
     {
         axeObject.SetActive(!axeObject.activeInHierarchy);
     }
+    
 }
