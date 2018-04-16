@@ -4,8 +4,11 @@ using UnityEngine;
 
 public class ItemPickup : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+    public Item item;
+
+    private void Start()
     {
-        Destroy(this.gameObject);
+        GetComponent<MeshFilter>().mesh = item.model.GetComponent<MeshFilter>().sharedMesh;
+        GetComponent<MeshRenderer>().material = item.model.GetComponent<MeshRenderer>().sharedMaterial;
     }
 }

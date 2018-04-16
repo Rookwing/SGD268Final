@@ -2,35 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/*===================================
-Project:	#PROJECTNAME#	
-Developer:	#DEVNAME#
-Company:	#COMPANY#
-Date:		#CREATIONDATE#
--------------------------------------
-Description:
-
-===================================*/
-
-public class Item : MonoBehaviour 
+    [CreateAssetMenu(fileName = "New Item", menuName = "Item")]
+public class Item : ScriptableObject 
 {
-	#region Public Variables
-	
-	#endregion
-	
-	#region Private Variables
-	
-	#endregion
-	
-	#region Enumerations
-	
-	#endregion
+    public new string name;
+    public string description;
 
-	#region Unity Methods
-	
-	#endregion
-	
-	#region Custom Methods
-	
-	#endregion
+    public Sprite icon;
+    public int damage;
+    public GameObject model;
 }
