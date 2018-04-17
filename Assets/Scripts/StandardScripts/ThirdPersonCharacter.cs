@@ -54,9 +54,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             CheckGroundStatus();
             move = Vector3.ProjectOnPlane(move, m_GroundNormal);
             m_ForwardAmount = move.z;
-            if (!m_Animator.GetBool("Targeting"))
-                m_TurnAmount = Mathf.Atan2(move.x, move.z);
-            else
+            //if (!m_Animator.GetBool("Targeting"))
+                //m_TurnAmount = Mathf.Atan2(move.x, move.z);
+            //else
                 m_TurnAmount = move.x;
 
             if (!m_Animator.GetBool("Targeting"))

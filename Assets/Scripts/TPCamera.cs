@@ -13,7 +13,6 @@ public class TPCamera : MonoBehaviour
     private Vector3 camPosition;
     private Vector3 fallbackPosition;
     private Vector3 aimPoint;
-    private Vector3 aimDir;
     private Vector2 cameraRot;
     private float camDistance;
     RaycastHit hit;
@@ -24,8 +23,6 @@ public class TPCamera : MonoBehaviour
     {
         player = GameManager.gm.player.transform;
         camDistance = Vector3.Distance(fallback.transform.position, player.position);
-        offset = (fallback.transform.position - player.position).normalized * camDistance;
-        transform.position = player.position + offset;
         cameraRot = Vector2.zero;
 
         layerMask = 1 << 8;
@@ -33,37 +30,38 @@ public class TPCamera : MonoBehaviour
     }
     void Update()
     {
-        if(Vector3.Distance(fallback.transform.position, player.position) > camDistance)
+        if (Vector3.Distance(fallback.transform.position, player.position) > camDistance)
         {
-            fallback.transform.Translate(transform.forward*Time.deltaTime);
+            fallback.transform.Translate(transform.forward * Time.deltaTime);
         }
         cameraRot = Vector2.zero;
         fallbackPosition = fallback.transform.position;
 
         aimPoint = (player.position + (Vector3.up * 2));
-        aimDir = fallbackPosition - aimPoint;
 
-        Debug.DrawLine(aimPoint, fallbackPosition, Color.cyan, 1, true);
 
         if (Physics.Linecast(aimPoint, fallbackPosition, out hit, layerMask))
         {
             if (hit.collider.isTrigger == false)
             {
                 camPosition = hit.point;
+                Debug.DrawLine(aimPoint, fallbackPosition, Color.red, 0, true);
             }
             else
             {
                 camPosition = fallbackPosition;
+                Debug.DrawLine(aimPoint, fallbackPosition, Color.cyan, 0, true);
             }
         }
         else
         {
             camPosition = fallbackPosition;
+            Debug.DrawLine(aimPoint, fallbackPosition, Color.cyan, 0, true);
         }
 
         //camPosition = GameManager.gm.player.transform.position + offset;
 
-        transform.position = Vector3.Lerp(transform.position, camPosition, Mathf.Lerp(0,1,3));
+        transform.position = Vector3.Lerp(transform.position, camPosition, Mathf.Lerp(0, 1, 3));
         transform.LookAt(aimPoint);
     }
     public float CameraRotation(float xValue, float yValue, bool rotatingPlayer)
@@ -71,8 +69,8 @@ public class TPCamera : MonoBehaviour
         if (xValue != 0)
         {
             cameraRot.x = xValue * cameraSensitivity;
-            if (!rotatingPlayer) 
-            fallback.transform.RotateAround(player.position, player.up, cameraRot.x);
+            if (!rotatingPlayer)
+                fallback.transform.RotateAround(player.position, player.up, cameraRot.x);
 
         }
 
@@ -81,16 +79,16 @@ public class TPCamera : MonoBehaviour
             cameraRot.y = yValue * cameraSensitivity;
 
             Vector3 localX = transform.TransformDirection(Vector3.right);
-            if (fallback.transform.localRotation.eulerAngles.x <= 60 || fallback.transform.localRotation.eulerAngles.x >= 0)
+
+            float camAngle = transform.rotation.eulerAngles.x;
+            camAngle = (camAngle > 180) ? camAngle - 360 : camAngle;
+            
+
+            if ((camAngle <= 60 && cameraRot.y > 0) || (camAngle >= -30 && cameraRot.y < 0))
             {
                 fallback.transform.RotateAround(player.position, localX, cameraRot.y);
             }
-            else
-            {
-                fallback.transform.localRotation.eulerAngles.Set(Mathf.Clamp(fallback.transform.localRotation.eulerAngles.x, 0, 60), fallback.transform.localRotation.eulerAngles.y, fallback.transform.localRotation.eulerAngles.z);
-            }
         }
-        offset = fallbackPosition - player.position;
 
         return cameraRot.x;
     }
