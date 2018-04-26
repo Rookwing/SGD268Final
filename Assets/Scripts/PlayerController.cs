@@ -31,9 +31,8 @@ public class PlayerController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                ActivateAbility(UIManager.ui.ability1Icon, 0.5f);
+                ActivateAbility(UIManager.ui.ability1Icon, 0.1f);
                 Attack();
-                //GameManager.gm.abilityActive = bToggle;
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2) && !GameManager.gm.canUse[0])
@@ -68,16 +67,19 @@ public class PlayerController : MonoBehaviour
             if (CrossPlatformInputManager.GetButtonDown("Fire1"))
             {
                 bool hit = false;
-                m_PointerEventData = new PointerEventData(m_EventSystem);
-                m_PointerEventData.position = Input.mousePosition;
+                m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
                 List<RaycastResult> results = new List<RaycastResult>();
                 m_Raycaster.Raycast(m_PointerEventData, results);
                 foreach (RaycastResult result in results)
                 {
                     if (result.gameObject.activeInHierarchy)
                     {
+                        if (result.gameObject.GetComponent<ItemSlot>())
+                        {
+                            result.gameObject.GetComponent<ItemSlot>().SelectItemSlot();
+                        }
                         hit = true;
-                        Debug.Log("Hit " + result.gameObject.name);
+                        //Debug.Log("Hit " + result.gameObject.name);
                     }
                 }
 
@@ -99,16 +101,36 @@ public class PlayerController : MonoBehaviour
             #region Right Clicking
             if (CrossPlatformInputManager.GetButtonDown("Fire2"))
             {
-                Cursor.lockState=CursorLockMode.Locked;
-                Cursor.visible = false;
-                lockedOn = true;
-                anim.SetBool("Targeting", true);
-                if (true) //for target later
+                bool hit = false;
+                m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
+                List<RaycastResult> results = new List<RaycastResult>();
+                m_Raycaster.Raycast(m_PointerEventData, results);
+                foreach (RaycastResult result in results)
                 {
-                    GameManager.gm.mainCam.fallback.transform.parent = null;
-                    Quaternion temp = Quaternion.Euler(Vector3.Scale(GameManager.gm.mainCam.transform.rotation.eulerAngles, Vector3.up.normalized));
-                    transform.rotation = temp;
-                    GameManager.gm.mainCam.fallback.transform.parent = transform;
+                    if (result.gameObject.activeInHierarchy)
+                    {
+                        if (result.gameObject.GetComponent<ItemSlot>())
+                        {
+                            result.gameObject.GetComponent<ItemSlot>().UseItemSlot();
+                        }
+                        hit = true;
+                        //Debug.Log("Hit " + result.gameObject.name);
+                    }
+                }
+
+                if (!hit)
+                {
+                    Cursor.lockState = CursorLockMode.Locked;
+                    Cursor.visible = false;
+                    lockedOn = true;
+                    anim.SetBool("Targeting", true);
+                    if (true) //for target later
+                    {
+                        GameManager.gm.mainCam.fallback.transform.parent = null;
+                        Quaternion temp = Quaternion.Euler(Vector3.Scale(GameManager.gm.mainCam.transform.rotation.eulerAngles, Vector3.up.normalized));
+                        transform.rotation = temp;
+                        GameManager.gm.mainCam.fallback.transform.parent = transform;
+                    }
                 }
                 //TODO: GetTarget()
             }
@@ -128,15 +150,15 @@ public class PlayerController : MonoBehaviour
             {
                 float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
                 float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
-                transform.Rotate(0,GameManager.gm.mainCam.CameraRotation(mouseX, mouseY, true), 0);
+                transform.Rotate(0, GameManager.gm.mainCam.CameraRotation(mouseX, -mouseY, true), 0);
                 //TODO: Make player look at target, and move camera accordingly. If there is no target, make the player turn to face the camera direction.
             }
 
-            else if(draggingCamera)
+            else if (draggingCamera)
             {
                 float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
                 float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
-                GameManager.gm.mainCam.CameraRotation(mouseX, mouseY, false);
+                GameManager.gm.mainCam.CameraRotation(-mouseX, mouseY, false);
             }
         }
     }

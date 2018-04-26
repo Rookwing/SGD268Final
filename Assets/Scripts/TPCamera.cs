@@ -28,7 +28,7 @@ public class TPCamera : MonoBehaviour
         layerMask = 1 << 8;
         layerMask = ~layerMask;
     }
-    void Update()
+    void FixedUpdate()
     {
         if (Vector3.Distance(fallback.transform.position, player.position) > camDistance)
         {
@@ -61,16 +61,16 @@ public class TPCamera : MonoBehaviour
 
         //camPosition = GameManager.gm.player.transform.position + offset;
 
-        transform.position = Vector3.Lerp(transform.position, camPosition, Mathf.Lerp(0, 1, 3));
+        transform.position = Vector3.Lerp(transform.position, camPosition, Mathf.Lerp(0, 1, .1f));
         transform.LookAt(aimPoint);
     }
     public float CameraRotation(float xValue, float yValue, bool rotatingPlayer)
     {
         if (xValue != 0)
         {
-            cameraRot.x = xValue * cameraSensitivity;
+            cameraRot.x = xValue;// * cameraSensitivity;
             if (!rotatingPlayer)
-                fallback.transform.RotateAround(player.position, player.up, cameraRot.x);
+                fallback.transform.RotateAround(player.position, player.up, -cameraRot.x);
 
         }
 
@@ -80,11 +80,11 @@ public class TPCamera : MonoBehaviour
 
             Vector3 localX = transform.TransformDirection(Vector3.right);
 
-            float camAngle = transform.rotation.eulerAngles.x;
+            float camAngle = fallback.transform.rotation.eulerAngles.x;
             camAngle = (camAngle > 180) ? camAngle - 360 : camAngle;
             
 
-            if ((camAngle <= 60 && cameraRot.y > 0) || (camAngle >= -30 && cameraRot.y < 0))
+            if ((camAngle <= 50 && cameraRot.y > 0) || (camAngle >= -30 && cameraRot.y < 0))
             {
                 fallback.transform.RotateAround(player.position, localX, cameraRot.y);
             }

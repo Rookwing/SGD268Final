@@ -4,8 +4,39 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    public GameObject[] inventoryArray;
     public GameObject inventoryMenu;
+
+    private ItemSlot[] inventoryArray;
+    private ItemSlot[] equipmentArray;
+    
+    public enum EquipSlot
+    {
+        Helmet,
+        Chest,
+        Legs,
+        Feet,
+        Hands,
+        Amulet,
+        RRing,
+        LRing,
+        MItem,
+        OItem//add new slots above OItem
+    }
+
+    private void Start()
+    {
+        inventoryArray = new ItemSlot[12];
+        equipmentArray = new ItemSlot[(int)EquipSlot.OItem+1];//this is why OItem should be last.
+
+        int i = 0;
+        foreach(ItemSlot slot in GetComponentsInChildren<ItemSlot>())
+        {
+            if(i <= inventoryArray.Length)
+            inventoryArray[i] = slot;
+            i++;
+        }
+        //TODO: Populate Equipment Slots
+    }
 
     public void MenuOpen()
     {
@@ -20,10 +51,5 @@ public class InventoryManager : MonoBehaviour
             GameManager.gm.Play();
         }
     }
-
-    public void AddItemToList(int indexKey)
-    {
-        //GameManager.gm.inventoryOnHand[indexKey] = GameManager.gm.inventoryInGame[indexKey];
-        GameManager.gm.GetComponent<InventoryManager>().AddItemToList(0);
-    }
+    
 }

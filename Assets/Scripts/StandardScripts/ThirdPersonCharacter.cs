@@ -54,9 +54,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             CheckGroundStatus();
             move = Vector3.ProjectOnPlane(move, m_GroundNormal);
             m_ForwardAmount = move.z;
-            //if (!m_Animator.GetBool("Targeting"))
-                //m_TurnAmount = Mathf.Atan2(move.x, move.z);
-            //else
+            if (!m_Animator.GetBool("Targeting"))
+                m_TurnAmount = Mathf.Atan2(move.x, move.z);
+            else
                 m_TurnAmount = move.x;
 
             if (!m_Animator.GetBool("Targeting"))
@@ -185,7 +185,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         {
             // help the character turn faster (this is in addition to root rotation in the animation)
             float turnSpeed = Mathf.Lerp(m_StationaryTurnSpeed, m_MovingTurnSpeed, m_ForwardAmount);
-            transform.Rotate(0, m_TurnAmount * turnSpeed * Time.deltaTime, 0);
+            float turn = m_TurnAmount * turnSpeed * Time.deltaTime;
+            transform.Rotate(0, turn, 0);
+
+            GameManager.gm.mainCam.CameraRotation(turn, 0, false);
         }
 
 
