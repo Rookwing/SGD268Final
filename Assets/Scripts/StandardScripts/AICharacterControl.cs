@@ -38,6 +38,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public void SetTarget(Transform target)
         {
             this.target = target;
+            if (target == null)
+            {
+                agent.isStopped = true;
+            }
         }
     }
 }

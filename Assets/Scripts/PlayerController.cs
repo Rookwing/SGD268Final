@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
 {
     Animator anim;
     bool attacking;
-    [SerializeField] GameObject axeObject;
+    [SerializeField] GameObject heldItem;
     private bool lockedOn = false;
     private bool draggingCamera = false;
     public GameObject lockTarget;
@@ -29,139 +29,145 @@ public class PlayerController : MonoBehaviour
     {
         if (!GameManager.gm.abilityActive)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
+            if (CrossPlatformInputManager.GetButtonDown("Attack"))
             {
                 ActivateAbility(UIManager.ui.ability1Icon, 0.1f);
                 Attack();
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha2) && !GameManager.gm.canUse[0])
+            if (CrossPlatformInputManager.GetButtonDown("Ranged") && !GameManager.gm.canUse[0])
             {
                 ActivateAbility(UIManager.ui.ability2Icon, 4);
                 anim.SetTrigger("tRange");
                 GameManager.gm.abilityActive = true;
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha3) && !GameManager.gm.canUse[1])
+            if (CrossPlatformInputManager.GetButtonDown("Spell") && !GameManager.gm.canUse[1])
             {
                 ActivateAbility(UIManager.ui.Ability3Icon, 4);
                 anim.SetTrigger("tMagic");
                 GameManager.gm.abilityActive = true;
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha4) && !GameManager.gm.canUse[2])
+            if (CrossPlatformInputManager.GetButtonDown("Health") && !GameManager.gm.canUse[2])
             {
                 ActivateAbility(UIManager.ui.Ability4Icon, 4);
                 anim.SetTrigger("tPotion");
                 GameManager.gm.abilityActive = true;
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha5) && !GameManager.gm.canUse[3])
+            if (CrossPlatformInputManager.GetButtonDown("Mana") && !GameManager.gm.canUse[3])
             {
                 ActivateAbility(UIManager.ui.Ability5Icon, 4);
                 anim.SetTrigger("tPotion");
                 GameManager.gm.abilityActive = true;
             }
+        }
 
-            #region Left clicking
-            if (CrossPlatformInputManager.GetButtonDown("Fire1"))
+        #region Left clicking
+        if (CrossPlatformInputManager.GetButtonDown("Fire1"))
+        {
+            bool hit = false;
+            m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
+            List<RaycastResult> results = new List<RaycastResult>();
+            m_Raycaster.Raycast(m_PointerEventData, results);
+            foreach (RaycastResult result in results)
             {
-                bool hit = false;
-                m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
-                List<RaycastResult> results = new List<RaycastResult>();
-                m_Raycaster.Raycast(m_PointerEventData, results);
-                foreach (RaycastResult result in results)
+                if (result.gameObject.activeInHierarchy)
                 {
-                    if (result.gameObject.activeInHierarchy)
+                    if (result.gameObject.GetComponent<ItemSlot>())
                     {
-                        if (result.gameObject.GetComponent<ItemSlot>())
-                        {
-                            result.gameObject.GetComponent<ItemSlot>().SelectItemSlot();
-                        }
-                        hit = true;
-                        //Debug.Log("Hit " + result.gameObject.name);
+                        result.gameObject.GetComponent<ItemSlot>().SelectItemSlot();
                     }
-                }
-
-                if (!hit)
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                    draggingCamera = true;
+                    hit = true;
+                    //Debug.Log("Hit " + result.gameObject.name);
                 }
             }
-            if (CrossPlatformInputManager.GetButtonUp("Fire1"))
+
+            if (!hit)
             {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-                draggingCamera = false;
-            }
-            #endregion
-
-            #region Right Clicking
-            if (CrossPlatformInputManager.GetButtonDown("Fire2"))
-            {
-                bool hit = false;
-                m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
-                List<RaycastResult> results = new List<RaycastResult>();
-                m_Raycaster.Raycast(m_PointerEventData, results);
-                foreach (RaycastResult result in results)
-                {
-                    if (result.gameObject.activeInHierarchy)
-                    {
-                        if (result.gameObject.GetComponent<ItemSlot>())
-                        {
-                            result.gameObject.GetComponent<ItemSlot>().UseItemSlot();
-                        }
-                        hit = true;
-                        //Debug.Log("Hit " + result.gameObject.name);
-                    }
-                }
-
-                if (!hit)
-                {
-                    Cursor.lockState = CursorLockMode.Locked;
-                    Cursor.visible = false;
-                    lockedOn = true;
-                    anim.SetBool("Targeting", true);
-                    if (true) //for target later
-                    {
-                        GameManager.gm.mainCam.fallback.transform.parent = null;
-                        Quaternion temp = Quaternion.Euler(Vector3.Scale(GameManager.gm.mainCam.transform.rotation.eulerAngles, Vector3.up.normalized));
-                        transform.rotation = temp;
-                        GameManager.gm.mainCam.fallback.transform.parent = transform;
-                    }
-                }
-                //TODO: GetTarget()
-            }
-
-            if (CrossPlatformInputManager.GetButtonUp("Fire2"))
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-
-                anim.SetBool("Targeting", false);
-                lockedOn = false;
-                //TODO: Remove Target once GetTarget() is added.
-            }
-            #endregion
-
-            if (lockedOn)
-            {
-                float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
-                float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
-                transform.Rotate(0, GameManager.gm.mainCam.CameraRotation(mouseX, -mouseY, true), 0);
-                //TODO: Make player look at target, and move camera accordingly. If there is no target, make the player turn to face the camera direction.
-            }
-
-            else if (draggingCamera)
-            {
-                float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
-                float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
-                GameManager.gm.mainCam.CameraRotation(-mouseX, mouseY, false);
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = false;
+                draggingCamera = true;
             }
         }
+        if (CrossPlatformInputManager.GetButtonUp("Fire1"))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            draggingCamera = false;
+        }
+        #endregion
+
+        #region Right Clicking
+
+#if UNITY_ANDROID || UNITY_IOS
+        if (CrossPlatformInputManager.GetButtonDown("Fire1"))
+#else
+            if (CrossPlatformInputManager.GetButtonDown("Fire2"))
+#endif
+        {
+            bool hit = false;
+            m_PointerEventData = new PointerEventData(m_EventSystem) { position = Input.mousePosition };
+            List<RaycastResult> results = new List<RaycastResult>();
+            m_Raycaster.Raycast(m_PointerEventData, results);
+            foreach (RaycastResult result in results)
+            {
+                if (result.gameObject.activeInHierarchy)
+                {
+                    if (result.gameObject.GetComponent<ItemSlot>())
+                    {
+                        result.gameObject.GetComponent<ItemSlot>().UseItemSlot();
+                    }
+                    hit = true;
+                    //Debug.Log("Hit " + result.gameObject.name);
+                }
+            }
+
+            if (!hit)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.visible = false;
+                lockedOn = true;
+                anim.SetBool("Targeting", true);
+                if (true) //for target later
+                {
+                    GameManager.gm.mainCam.fallback.transform.parent = null;
+                    Quaternion temp = Quaternion.Euler(Vector3.Scale(GameManager.gm.mainCam.transform.rotation.eulerAngles, Vector3.up.normalized));
+                    transform.rotation = temp;
+                    GameManager.gm.mainCam.fallback.transform.parent = transform;
+                }
+            }
+            //TODO: GetTarget()
+        }
+
+        if (CrossPlatformInputManager.GetButtonUp("Fire2"))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            anim.SetBool("Targeting", false);
+            lockedOn = false;
+            //TODO: Remove Target once GetTarget() is added.
+        }
+        #endregion
+
+        if (lockedOn)
+        {
+            float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
+            float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
+            transform.Rotate(0, GameManager.gm.mainCam.CameraRotation(mouseX, -mouseY, true), 0);
+            //TODO: Make player look at target, and move camera accordingly. If there is no target, make the player turn to face the camera direction.
+        }
+
+        else if (draggingCamera)
+        {
+            float mouseX = CrossPlatformInputManager.GetAxis("Mouse X");
+            float mouseY = CrossPlatformInputManager.GetAxis("Mouse Y");
+            GameManager.gm.mainCam.CameraRotation(-mouseX, mouseY, false);
+        }
     }
+
 
     void ActivateAbility(Image image, float cooldown)
     {
@@ -190,7 +196,7 @@ public class PlayerController : MonoBehaviour
 
     public void ToggleAxe()
     {
-        axeObject.SetActive(!axeObject.activeInHierarchy);
+        heldItem.SetActive(!heldItem.activeInHierarchy);
     }
 
 }
